@@ -138,17 +138,18 @@
    DAILY DATA — replace this block each day, then redeploy.
    This is the ONLY section that changes day to day.
    ============================================================ */
-const LAST_UPDATED = "2026-07-20 09:00";
+const LAST_UPDATED = "2026-07-21 09:00";
 const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdZbhJs5TuB_LwMBlzxUIl1jWXFdF2R8gYZhoybabkY0w53RQ/viewform";
 const CONFIG = { referral:1, referralAppt:3, tcep:2, reconnect:3 };
-const AGENTS = [
+const AGENT_ROSTER = [
   "Allison Braun","Amy Thomson","Andrew Schwarz","Angela Ring","Beth Perine",
   "Chad Erdmann","Chris Bunz","Darby Helms","Denise Fett","Erin Riebe",
   "Gabriella Bieber","Ingrid Benson","Jordan Lenick","Kathy Eastlund","Matt Pesek",
-  "Noah Ableidinger","Tammy Klade","Terina Irby","Vicki Kissack",
+  "Noah Ableidinger","Tammy Klade","Terina Irby","Vicki Kissack"
 ];
 const SUBMISSIONS = [
-  // No form responses logged yet for the referrals phase — everyone starts at 0.
+  // Real form data — updated daily from the Google Sheet export.
+  { agent:"Amy Thomson", phase:"referrals", detail:{ referrals:0, referralAppts:0 } },
 ];
 /* ============================================================
    END DAILY DATA
@@ -186,17 +187,18 @@ function renderLeaderboards(){
   const map = { referrals:'lb-referrals', tcep:'lb-tcep', reconnect:'lb-reconnect' };
   PHASES.forEach(p=>{
     const st = phaseStatus(p);
+    const totals = {};
+    if (st==='live'){ AGENT_ROSTER.forEach(name=>{ totals[name] = 0; }); }
+    SUBMISSIONS.filter(s=>s.phase===p.id).forEach(s=>{ totals[s.agent] = (totals[s.agent]||0) + pointsFor(s); });
+    let ranked = Object.entries(totals).sort((a,b)=> b[1]-a[1] || a[0].localeCompare(b[0]));
+    if (st==='done'){ ranked = ranked.slice(0,3); }
     const statusLabel = st==='live' ? 'open' : st==='soon' ? 'coming soon' : 'wrapped';
     let body;
     if (st==='soon'){
-      // Coming soon: no agent names shown.
-      body = `<div class="empty">Coming soon</div>`;
+      body = `<div class="empty">Kicks off ${fmtRange(p)} — nothing to show yet.</div>`;
+    } else if (ranked.length===0){
+      body = `<div class="empty">No submissions logged yet.</div>`;
     } else {
-      const totals = {};
-      AGENTS.forEach(a=>{ totals[a] = 0; });
-      SUBMISSIONS.filter(s=>s.phase===p.id).forEach(s=>{ totals[s.agent] = (totals[s.agent]||0) + pointsFor(s); });
-      let ranked = Object.entries(totals).sort((a,b)=> b[1]-a[1] || a[0].localeCompare(b[0]));
-      if (st==='done') ranked = ranked.slice(0,3); // Wrapped: top 3 only.
       body = ranked.map(([name,pts],i)=>`
         <div class="row"><div class="rank">${i+1}</div><div class="name">${name}</div><div class="pts">${pts} pts</div></div>`).join('');
     }
