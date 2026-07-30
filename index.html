@@ -138,26 +138,24 @@
    DAILY DATA — replace this block each day, then redeploy.
    This is the ONLY section that changes day to day.
    ============================================================ */
-const LAST_UPDATED = "2026-07-29 08:30";
+const LAST_UPDATED = "2026-07-30 08:00 PT";
 const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdZbhJs5TuB_LwMBlzxUIl1jWXFdF2R8gYZhoybabkY0w53RQ/viewform";
 const CONFIG = { referral:1, referralAppt:3, tcep:2, reconnect:3 };
-const AGENTS = [
-  "Allison Braun","Amy Thomson","Andrew Schwarz","Angela Ring","Beth Perine",
-  "Chad Erdmann","Chris Bunz","Darby Helms","Denise Fett","Erin Riebe",
-  "Gabriella Bieber","Ingrid Benson","Jordan Lenick","Kathy Eastlund","Matt Pesek",
-  "Noah Ableidinger","Tammy Klade","Terina Irby","Vicki Kissack"
-];
+const AGENT_ROSTER = ["Allison Braun","Amy Thomson","Andrew Schwarz","Angela Ring","Beth Perine","Chad Erdmann","Chris Bunz","Darby Helms","Denise Fett","Erin Riebe","Gabriella Bieber","Ingrid Benson","Jordan Lenick","Kathy Eastlund","Matt Pesek","Noah Ableidinger","Tammy Klade","Terina Irby","Vicki Kissack"];
 const SUBMISSIONS = [
   { agent:"Amy Thomson",      phase:"referrals", detail:{ referrals:0, referralAppts:0 } },
   { agent:"Terina Irby",      phase:"referrals", detail:{ referrals:1, referralAppts:2 } },
   { agent:"Tammy Klade",      phase:"referrals", detail:{ referrals:1, referralAppts:1 } },
   { agent:"Gabriella Bieber", phase:"referrals", detail:{ referrals:0, referralAppts:0 } },
+  // Row logged "1 couple" for referrals — counted as 1 referral.
   { agent:"Beth Perine",      phase:"referrals", detail:{ referrals:1, referralAppts:1 } },
   { agent:"Jordan Lenick",    phase:"referrals", detail:{ referrals:1, referralAppts:0 } },
   { agent:"Jordan Lenick",    phase:"referrals", detail:{ referrals:1, referralAppts:0 } },
+  // Row logged a text note instead of numbers — counted as 0/0.
   { agent:"Tammy Klade",      phase:"referrals", detail:{ referrals:0, referralAppts:0 } },
   { agent:"Terina Irby",      phase:"referrals", detail:{ referrals:0, referralAppts:0 } },
   { agent:"Terina Irby",      phase:"referrals", detail:{ referrals:0, referralAppts:0 } },
+  // Row logged "1 couple" for referrals — counted as 1 referral.
   { agent:"Beth Perine",      phase:"referrals", detail:{ referrals:1, referralAppts:1 } },
   { agent:"Allison Braun",    phase:"referrals", detail:{ referrals:1, referralAppts:1 } },
   { agent:"Tammy Klade",      phase:"referrals", detail:{ referrals:1, referralAppts:1 } },
@@ -171,6 +169,9 @@ const SUBMISSIONS = [
   { agent:"Beth Perine",      phase:"referrals", detail:{ referrals:1, referralAppts:0 } },
   { agent:"Beth Perine",      phase:"referrals", detail:{ referrals:1, referralAppts:1 } },
   { agent:"Amy Thomson",      phase:"referrals", detail:{ referrals:2, referralAppts:2 } },
+  { agent:"Denise Fett",      phase:"referrals", detail:{ referrals:1, referralAppts:1 } },
+  { agent:"Beth Perine",      phase:"referrals", detail:{ referrals:1, referralAppts:1 } },
+  { agent:"Tammy Klade",      phase:"referrals", detail:{ referrals:1, referralAppts:0 } },
 ];
 /* ============================================================
    END DAILY DATA
@@ -209,15 +210,15 @@ function renderLeaderboards(){
   PHASES.forEach(p=>{
     const st = phaseStatus(p);
     const totals = {};
-    AGENTS.forEach(name=>{ totals[name] = 0; });
+    if (st!=='soon'){ AGENT_ROSTER.forEach(name=>{ totals[name] = 0; }); }
     SUBMISSIONS.filter(s=>s.phase===p.id).forEach(s=>{ totals[s.agent] = (totals[s.agent]||0) + pointsFor(s); });
     let ranked = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
+    if (st==='done'){ ranked = ranked.slice(0,3); }
     const statusLabel = st==='live' ? 'open' : st==='soon' ? 'coming soon' : 'wrapped';
     let body;
     if (st==='soon'){
       body = `<div class="empty">Kicks off ${fmtRange(p)} — nothing to show yet.</div>`;
     } else {
-      if (st==='done') ranked = ranked.slice(0,3);
       body = ranked.map(([name,pts],i)=>`
         <div class="row"><div class="rank">${i+1}</div><div class="name">${name}</div><div class="pts">${pts} pts</div></div>`).join('');
     }
