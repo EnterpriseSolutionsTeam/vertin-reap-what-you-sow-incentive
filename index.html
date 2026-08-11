@@ -23,8 +23,6 @@
     --gold-soft:rgba(200,169,106,0.14);
     --green-soft:rgba(110,139,110,0.14);
     --yellow:#D8B34D;
-    --wrapped-gray:#8A97A6;
-    --wrapped-bg:#F1F3F5;
   }
   *{box-sizing:border-box;}
   body{margin:0;background:var(--page-bg);color:var(--navy);font-family:'Work Sans',sans-serif;line-height:1.55;position:relative;}
@@ -47,18 +45,6 @@
   .card{background:var(--card-bg);border:1px solid var(--border);border-top:4px solid var(--blue);border-radius:14px;padding:20px 22px;margin-bottom:18px;box-shadow:0 1px 2px rgba(13,35,64,0.04);}
   .card.card-tcep{border-top-color:var(--green);}
   .card.card-reconnect{border-top-color:var(--gold);}
-  .card.wrapped{border-top-color:var(--wrapped-gray);background:var(--wrapped-bg);}
-  .card.wrapped h3{color:var(--wrapped-gray);}
-  .card.wrapped h3 .phase-icon{color:var(--wrapped-gray);}
-  .card.wrapped .subtext{color:var(--wrapped-gray);}
-  .card.wrapped .row{color:var(--wrapped-gray);}
-  .card.wrapped .row .name{color:var(--wrapped-gray);}
-  .card.wrapped .row.rank-1 .rank{background:var(--green);color:#fff;}
-  .card.wrapped .row.rank-2 .rank{background:var(--blue);color:#fff;}
-  .card.wrapped .row.rank-3 .rank{background:var(--yellow);color:var(--navy);}
-  .card.wrapped .row.rank-1 .pts{color:var(--green);}
-  .card.wrapped .row.rank-2 .pts{color:var(--blue);}
-  .card.wrapped .row.rank-3 .pts{color:var(--yellow);}
   .card h3{font-size:17px;color:var(--navy);display:flex;align-items:center;gap:8px;}
   .card h3 .phase-icon{flex-shrink:0;width:19px;height:19px;}
   .card-referrals h3 .phase-icon{color:var(--blue);}
@@ -79,6 +65,17 @@
   .row .name{flex:1;font-size:14.5px;}
   .row .pts{font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--blue);font-size:15px;}
   .empty{color:var(--text-muted);font-size:13.5px;padding:12px 4px;font-style:italic;}
+  .card.wrapped{border-top-color:var(--text-muted);background:var(--card-alt);}
+  .card.wrapped h3{color:var(--text-muted);}
+  .card.wrapped h3 .phase-icon{color:var(--text-muted);}
+  .card.wrapped .row{color:var(--text-muted);}
+  .card.wrapped .row .name{color:var(--text-muted);}
+  .card.wrapped .rank.rank-1{background:var(--green);color:#fff;}
+  .card.wrapped .rank.rank-2{background:var(--blue);color:#fff;}
+  .card.wrapped .rank.rank-3{background:var(--yellow);color:var(--navy);}
+  .card.wrapped .pts.rank-1{color:var(--green);}
+  .card.wrapped .pts.rank-2{color:var(--blue);}
+  .card.wrapped .pts.rank-3{color:var(--yellow);}
   .fanwrap{margin-top:20px;line-height:0;}
   .brandbar{background:var(--navy);color:var(--page-bg);padding:22px 26px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;border-bottom:4px solid var(--gold);}
   .brandbar .tag{font-family:'Archivo',sans-serif;font-weight:700;letter-spacing:0.08em;font-size:14px;text-transform:uppercase;}
@@ -153,7 +150,7 @@
    DAILY DATA — replace this block each day, then redeploy.
    This is the ONLY section that changes day to day.
    ============================================================ */
-const LAST_UPDATED = "2026-08-10 08:30 PT";
+const LAST_UPDATED = "2026-08-11 07:00 PT";
 const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeOLT8lJzUcjUbc9pXfjdKFdhvpGlnWwmZ6EVA32sIbguBmxg/viewform?usp=header";
 const CONFIG = { referral:1, referralAppt:3, tcep:2, reconnect:3 };
 const PRIZES = { 1:400, 2:300, 3:200 };
@@ -202,9 +199,11 @@ const SUBMISSIONS = [
   { agent:"Darby Helms",      phase:"tcep", detail:{ tcep:1 } },
   { agent:"Denise Fett",      phase:"tcep", detail:{ tcep:1 } },
   { agent:"Amy Thomson",      phase:"tcep", detail:{ tcep:2 } },
-  { agent:"Terina Irby",      phase:"tcep", detail:{ tcep:0 } },
+  { agent:"Terina Irby",      phase:"tcep", detail:{ tcep:2 } },
   { agent:"Beth Perine",      phase:"tcep", detail:{ tcep:1 } },
   { agent:"Beth Perine",      phase:"tcep", detail:{ tcep:1 } },
+  { agent:"Terina Irby",      phase:"tcep", detail:{ tcep:2 } },
+  { agent:"Amy Thomson",      phase:"tcep", detail:{ tcep:1 } },
 ];
 /* ============================================================
    END DAILY DATA
@@ -251,15 +250,18 @@ function renderLeaderboards(){
     let body;
     if (st==='soon'){
       body = `<div class="empty">Kicks off ${fmtRange(p)} — nothing to show yet.</div>`;
-    } else {
+    } else if (st==='done'){
       body = ranked.map(([name,pts],i)=>{
-        const rankClass = st==='done' && i<3 ? ` rank-${i+1}` : '';
-        const valueLabel = st==='done' && PRIZES[i+1] ? `$${PRIZES[i+1]}` : `${pts} pts`;
-        return `<div class="row${rankClass}"><div class="rank">${i+1}</div><div class="name">${name}</div><div class="pts">${valueLabel}</div></div>`;
+        const rank = i+1;
+        const prize = PRIZES[rank] || 0;
+        return `<div class="row"><div class="rank rank-${rank}">${rank}</div><div class="name">${name}</div><div class="pts rank-${rank}">$${prize}</div></div>`;
       }).join('');
+    } else {
+      body = ranked.map(([name,pts],i)=>`
+        <div class="row"><div class="rank">${i+1}</div><div class="name">${name}</div><div class="pts">${pts} pts</div></div>`).join('');
     }
     const cardEl = document.getElementById(map[p.id]);
-    cardEl.className = 'card card-' + p.id + (st==='done' ? ' wrapped' : '');
+    cardEl.classList.toggle('wrapped', st==='done');
     cardEl.innerHTML = `
       <div class="lb-header"><h3>${p.icon}${p.label}</h3><span class="status ${st}">${statusLabel}</span></div>
       <p class="subtext" style="margin-top:-6px;">${fmtRange(p)}</p>
