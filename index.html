@@ -17,12 +17,12 @@
     --blue:#11539E;
     --green:#6E8B6E;
     --gold:#C8A96A;
-    --yellow:#D8B34D;
     --lightblue:#B7C7D9;
     --text-secondary:#3E5570;
     --text-muted:#5C7392;
     --gold-soft:rgba(200,169,106,0.14);
     --green-soft:rgba(110,139,110,0.14);
+    --yellow:#D8B34D;
   }
   *{box-sizing:border-box;}
   body{margin:0;background:var(--page-bg);color:var(--navy);font-family:'Work Sans',sans-serif;line-height:1.55;position:relative;}
@@ -59,17 +59,24 @@
   .row{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid var(--border);}
   .row:last-child{border-bottom:none;}
   .rank{width:26px;height:26px;border-radius:50%;background:var(--card-alt);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600;color:var(--text-secondary);flex-shrink:0;}
-  .rank.rank-1{background:var(--green);color:#fff;}
-  .rank.rank-2{background:var(--blue);color:#fff;}
-  .rank.rank-3{background:var(--yellow);color:var(--navy);}
+  .row:nth-child(1) .rank{background:var(--gold);color:var(--navy);}
+  .row:nth-child(2) .rank{background:var(--lightblue);color:var(--navy);}
+  .row:nth-child(3) .rank{background:var(--green);color:#fff;}
   .row .name{flex:1;font-size:14.5px;}
   .row .pts{font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--blue);font-size:15px;}
-  .row .pts.rank-1{color:var(--green);}
-  .row .pts.rank-2{color:var(--blue);}
-  .row .pts.rank-3{color:var(--yellow);}
   .empty{color:var(--text-muted);font-size:13.5px;padding:12px 4px;font-style:italic;}
   .card.wrapped{border-top-color:var(--text-muted);background:var(--card-alt);}
-  .card.wrapped h3,.card.wrapped h3 .phase-icon,.card.wrapped .row .name{color:var(--text-muted);}
+  .card.wrapped h3{color:var(--text-muted);}
+  .card.wrapped h3 .phase-icon{color:var(--text-muted);}
+  .card.wrapped .subtext{color:var(--text-muted);}
+  .card.wrapped .row .name{color:var(--text-muted);}
+  .card.wrapped .row{border-bottom-color:var(--border);}
+  .row.rank-1 .rank{background:var(--green);color:#fff;}
+  .row.rank-2 .rank{background:var(--blue);color:#fff;}
+  .row.rank-3 .rank{background:var(--yellow);color:var(--navy);}
+  .row.rank-1 .pts{color:var(--green);}
+  .row.rank-2 .pts{color:var(--blue);}
+  .row.rank-3 .pts{color:var(--yellow);}
   .fanwrap{margin-top:20px;line-height:0;}
   .brandbar{background:var(--navy);color:var(--page-bg);padding:22px 26px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;border-bottom:4px solid var(--gold);}
   .brandbar .tag{font-family:'Archivo',sans-serif;font-weight:700;letter-spacing:0.08em;font-size:14px;text-transform:uppercase;}
@@ -144,7 +151,7 @@
    DAILY DATA — replace this block each day, then redeploy.
    This is the ONLY section that changes day to day.
    ============================================================ */
-const LAST_UPDATED = "2026-08-12 08:00 PT";
+const LAST_UPDATED = "2026-08-13 08:00 CT";
 const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeOLT8lJzUcjUbc9pXfjdKFdhvpGlnWwmZ6EVA32sIbguBmxg/viewform?usp=header";
 const CONFIG = { referral:1, referralAppt:3, tcep:2, reconnect:3 };
 const PRIZES = { 1:400, 2:300, 3:200 };
@@ -247,9 +254,10 @@ function renderLeaderboards(){
       body = `<div class="empty">Kicks off ${fmtRange(p)} — nothing to show yet.</div>`;
     } else {
       body = ranked.map(([name,pts],i)=>{
-        const rankClass = i<3 ? ` rank-${i+1}` : '';
-        const value = st==='done' ? `$${PRIZES[i+1] || 0}` : `${pts} pts`;
-        return `<div class="row"><div class="rank${rankClass}">${i+1}</div><div class="name">${name}</div><div class="pts${rankClass}">${value}</div></div>`;
+        const rankClass = st==='done' ? ` rank-${i+1}` : '';
+        const valueLabel = st==='done' ? `$${PRIZES[i+1]}` : `${pts} pts`;
+        return `
+        <div class="row${rankClass}"><div class="rank">${i+1}</div><div class="name">${name}</div><div class="pts">${valueLabel}</div></div>`;
       }).join('');
     }
     const cardEl = document.getElementById(map[p.id]);
