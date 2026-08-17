@@ -17,12 +17,12 @@
     --blue:#11539E;
     --green:#6E8B6E;
     --gold:#C8A96A;
+    --yellow:#D8B34D;
     --lightblue:#B7C7D9;
     --text-secondary:#3E5570;
     --text-muted:#5C7392;
     --gold-soft:rgba(200,169,106,0.14);
     --green-soft:rgba(110,139,110,0.14);
-    --yellow:#D8B34D;
   }
   *{box-sizing:border-box;}
   body{margin:0;background:var(--page-bg);color:var(--navy);font-family:'Work Sans',sans-serif;line-height:1.55;position:relative;}
@@ -68,15 +68,13 @@
   .card.wrapped{border-top-color:var(--text-muted);background:var(--card-alt);}
   .card.wrapped h3{color:var(--text-muted);}
   .card.wrapped h3 .phase-icon{color:var(--text-muted);}
-  .card.wrapped .subtext{color:var(--text-muted);}
   .card.wrapped .row .name{color:var(--text-muted);}
-  .card.wrapped .row{border-bottom-color:var(--border);}
-  .row.rank-1 .rank{background:var(--green);color:#fff;}
-  .row.rank-2 .rank{background:var(--blue);color:#fff;}
-  .row.rank-3 .rank{background:var(--yellow);color:var(--navy);}
-  .row.rank-1 .pts{color:var(--green);}
-  .row.rank-2 .pts{color:var(--blue);}
-  .row.rank-3 .pts{color:var(--yellow);}
+  .rank.rank-1{background:var(--green);color:#fff;}
+  .rank.rank-2{background:var(--blue);color:#fff;}
+  .rank.rank-3{background:var(--yellow);color:var(--navy);}
+  .pts.rank-1{color:var(--green);}
+  .pts.rank-2{color:var(--blue);}
+  .pts.rank-3{color:var(--yellow);}
   .fanwrap{margin-top:20px;line-height:0;}
   .brandbar{background:var(--navy);color:var(--page-bg);padding:22px 26px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;border-bottom:4px solid var(--gold);}
   .brandbar .tag{font-family:'Archivo',sans-serif;font-weight:700;letter-spacing:0.08em;font-size:14px;text-transform:uppercase;}
@@ -151,8 +149,8 @@
    DAILY DATA — replace this block each day, then redeploy.
    This is the ONLY section that changes day to day.
    ============================================================ */
-const LAST_UPDATED = "2026-08-14 08:00 PT";
-const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeOLT8lJzUcjUbc9pXfjdKFdhvpGlnWwmZ6EVA32sIbguBmxg/viewform?usp=header";
+const LAST_UPDATED = "2026-08-17 08:00 PT";
+const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfHcthS7KNUlmahgSn5SkzmfH7ZXR_cqJ8Hya9Ese_K5ddP_g/viewform";
 const CONFIG = { referral:1, referralAppt:3, tcep:2, reconnect:3 };
 const PRIZES = { 1:400, 2:300, 3:200 };
 const AGENTS = [
@@ -206,6 +204,9 @@ const SUBMISSIONS = [
   { agent:"Terina Irby",      phase:"tcep", detail:{ tcep:2 } },
   { agent:"Amy Thomson",      phase:"tcep", detail:{ tcep:1 } },
   { agent:"Terina Irby",      phase:"tcep", detail:{ tcep:2 } },
+  { agent:"Darby Helms",      phase:"tcep", detail:{ tcep:4 } },
+  { agent:"Beth Perine",      phase:"tcep", detail:{ tcep:1 } },
+  { agent:"Beth Perine",      phase:"tcep", detail:{ tcep:1 } },
 ];
 /* ============================================================
    END DAILY DATA
@@ -239,6 +240,33 @@ function renderDatebar(){
     return `<span class="chip${st==='live'?' active':''}">${p.label} · ${fmtRange(p)}${st==='live'?' · open now':st==='done'?' · wrapped':''}</span>`;
   }).join('');
 }
+function computeWrappedResults(ranked){
+  // Groups ties together, then fills rank slots 1-3 in order. A tie that
+  // spans a rank boundary (e.g. two agents tied for 1st) splits the combined
+  // prize money for the slots it occupies evenly across the tied agents.
+  const groups = [];
+  let i = 0;
+  while (i < ranked.length && groups.length < 3){
+    let j = i;
+    while (j < ranked.length && ranked[j][1] === ranked[i][1]) j++;
+    groups.push(ranked.slice(i, j));
+    i = j;
+  }
+  let slot = 1;
+  const results = [];
+  for (const g of groups){
+    if (slot > 3) break;
+    const usedSlots = [];
+    for (let s = 0; s < g.length && slot <= 3; s++, slot++) usedSlots.push(slot);
+    const totalPrize = usedSlots.reduce((sum,s)=>sum+(PRIZES[s]||0),0);
+    const share = totalPrize / g.length;
+    g.forEach(([name,pts])=>results.push({ name, pts, prize:share, rankTier:usedSlots[0] }));
+  }
+  return results;
+}
+function fmtPrize(n){
+  return Number.isInteger(n) ? `$${n}` : `$${n.toFixed(2)}`;
+}
 function renderLeaderboards(){
   const map = { referrals:'lb-referrals', tcep:'lb-tcep', reconnect:'lb-reconnect' };
   PHASES.forEach(p=>{
@@ -247,18 +275,17 @@ function renderLeaderboards(){
     AGENTS.forEach(a=>{ totals[a] = 0; });
     SUBMISSIONS.filter(s=>s.phase===p.id).forEach(s=>{ totals[s.agent] = (totals[s.agent]||0) + pointsFor(s); });
     let ranked = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
-    if (st==='done') ranked = ranked.slice(0,3);
     const statusLabel = st==='live' ? 'open' : st==='soon' ? 'coming soon' : 'wrapped';
     let body;
     if (st==='soon'){
       body = `<div class="empty">Kicks off ${fmtRange(p)} — nothing to show yet.</div>`;
+    } else if (st==='done'){
+      const results = computeWrappedResults(ranked);
+      body = results.map(r=>`
+        <div class="row"><div class="rank rank-${r.rankTier}">${r.rankTier}</div><div class="name">${r.name}</div><div class="pts rank-${r.rankTier}">${fmtPrize(r.prize)}</div></div>`).join('');
     } else {
-      body = ranked.map(([name,pts],i)=>{
-        const rankClass = st==='done' ? ` rank-${i+1}` : '';
-        const valueLabel = st==='done' ? `$${PRIZES[i+1]}` : `${pts} pts`;
-        return `
-        <div class="row${rankClass}"><div class="rank">${i+1}</div><div class="name">${name}</div><div class="pts">${valueLabel}</div></div>`;
-      }).join('');
+      body = ranked.map(([name,pts],i)=>`
+        <div class="row"><div class="rank">${i+1}</div><div class="name">${name}</div><div class="pts">${pts} pts</div></div>`).join('');
     }
     const cardEl = document.getElementById(map[p.id]);
     cardEl.classList.toggle('wrapped', st==='done');
