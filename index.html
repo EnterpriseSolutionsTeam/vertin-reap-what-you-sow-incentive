@@ -149,7 +149,7 @@
    DAILY DATA — replace this block each day, then redeploy.
    This is the ONLY section that changes day to day.
    ============================================================ */
-const LAST_UPDATED = "2026-08-18 08:30 PT";
+const LAST_UPDATED = "2026-08-19 08:30 CT";
 const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfHcthS7KNUlmahgSn5SkzmfH7ZXR_cqJ8Hya9Ese_K5ddP_g/viewform";
 const CONFIG = { referral:1, referralAppt:3, tcep:2, reconnect:3 };
 const PRIZES = { 1:400, 2:300, 3:200 };
@@ -208,8 +208,19 @@ const SUBMISSIONS = [
   { agent:"Beth Perine",      phase:"tcep", detail:{ tcep:1 } },
   { agent:"Beth Perine",      phase:"tcep", detail:{ tcep:1 } },
 
-  { agent:"Amy Thomson",      phase:"reconnect", detail:{ count:2, families:["Barksdale - Direct Mail","Denlinger - Walk-in/Call-in"] } },
-  { agent:"Tammy Klade",      phase:"reconnect", detail:{ count:1, families:["Marion Perkins - Unfunded (file started, spouse deceased)"] } },
+  { agent:"Amy Thomson",      phase:"reconnect", detail:{ count:2, families:[
+      { name:"Barksdale", source:"Direct mail" },
+      { name:"Denlinger", source:"Walk in / call in" }
+    ] } },
+  { agent:"Tammy Klade",      phase:"reconnect", detail:{ count:1, families:[
+      { name:"Marion Perkins", source:"File started when spouse deceased" }
+    ] } },
+  { agent:"Darby Helms",      phase:"reconnect", detail:{ count:1, families:[
+      { name:"Boudreaux", source:"ACEP" }
+    ] } },
+  { agent:"Terina Irby",      phase:"reconnect", detail:{ count:1, families:[
+      { name:"Teresa Morales", source:"Unfunded list" }
+    ] } },
 ];
 /* ============================================================
    END DAILY DATA
