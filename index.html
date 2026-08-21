@@ -149,7 +149,7 @@
    DAILY DATA — replace this block each day, then redeploy.
    This is the ONLY section that changes day to day.
    ============================================================ */
-const LAST_UPDATED = "2026-08-20 08:00 PT";
+const LAST_UPDATED = "2026-08-21 08:00 PT";
 const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfHcthS7KNUlmahgSn5SkzmfH7ZXR_cqJ8Hya9Ese_K5ddP_g/viewform";
 const CONFIG = { referral:1, referralAppt:3, tcep:2, reconnect:3 };
 const PRIZES = { 1:400, 2:300, 3:200 };
@@ -208,23 +208,29 @@ const SUBMISSIONS = [
   { agent:"Beth Perine",      phase:"tcep", detail:{ tcep:1 } },
   { agent:"Beth Perine",      phase:"tcep", detail:{ tcep:1 } },
 
-  { agent:"Amy Thomson", phase:"reconnect", detail:{ count:2, families:[
-    { name:"Barksdale", source:"direct mail" },
-    { name:"Denlinger", source:"walk in call in" }
+  { agent:"Amy Thomson",  phase:"reconnect", detail:{ count:2, families:[
+      { name:"Barksdale",  source:"Direct Mail" },
+      { name:"Denlinger",  source:"Walk-in/Call-in" }
   ] } },
-  { agent:"Tammy Klade", phase:"reconnect", detail:{ count:1, families:[
-    { name:"Marion Perkins", source:"file started when spouse deceased" }
+  { agent:"Tammy Klade",  phase:"reconnect", detail:{ count:1, families:[
+      { name:"Marion Perkins", source:"Spouse Deceased File" }
   ] } },
-  { agent:"Darby Helms", phase:"reconnect", detail:{ count:1, families:[
-    { name:"Boudreaux", source:"ACEP" }
+  { agent:"Darby Helms",  phase:"reconnect", detail:{ count:1, families:[
+      { name:"Boudreaux", source:"ACEP" }
   ] } },
-  { agent:"Terina Irby", phase:"reconnect", detail:{ count:1, families:[
-    { name:"Teresa Morales", source:"presented unfunded list" }
+  { agent:"Terina Irby",  phase:"reconnect", detail:{ count:1, families:[
+      { name:"Teresa Morales", source:"Unfunded List" }
   ] } },
-  { agent:"Terina Irby", phase:"reconnect", detail:{ count:3, families:[
-    { name:"Ron Hodges", source:"direct mail follow up" },
-    { name:"Gary Horning", source:"direct mail follow up" },
-    { name:"Lisa Myers", source:"unfunded" }
+  { agent:"Terina Irby",  phase:"reconnect", detail:{ count:3, families:[
+      { name:"Ron Hodges",   source:"Direct Mail Follow-up" },
+      { name:"Gary Horning", source:"Direct Mail Follow-up" },
+      { name:"Lisa Myers",   source:"Unfunded" }
+  ] } },
+  { agent:"Darby Helms",  phase:"reconnect", detail:{ count:1, families:[
+      { name:"Weber", source:"Walk-in/Call-in" }
+  ] } },
+  { agent:"Terina Irby",  phase:"reconnect", detail:{ count:1, families:[
+      { name:"Chase Family", source:"Unfunded" }
   ] } },
 ];
 /* ============================================================
